@@ -34,8 +34,8 @@ def test_Ar(key, inp, out):
     ct =  Ar(key, inp, mode='enc')
     # pt = Ar(key, ct, mode='dec')
     # assert inp == pt
-    log.debug('test_Ar ct : {}'.format(ct.encode('hex')))
-    log.debug('test_Ar out: {}'.format(out))
+    log.debug(f"test_Ar ct : {ct.encode('hex')}")
+    log.debug(f'test_Ar out: {out}')
     assert ct.encode('hex') == out
 
 
@@ -53,7 +53,7 @@ def test_e3_1():
     aco  = bytearray.fromhex('48afcdd4bd40fef76693b113')
     key  = bytearray.fromhex('00000000000000000000000000000000')
 
-    Keys = [i for i in range(18)]
+    Keys = list(range(18))
     ComputedKeys, Ar, ComputedKeysPrime, ArPrime, ComputedKc = H(key, rand, aco, 12)
     print('test_e3_1 BEGIN ComputedKeys, Ar')
     round1 =bytearray.fromhex('00000000000000000000000000000000')
@@ -180,7 +180,7 @@ def test_e3_2():
     aco  = bytearray.fromhex('68f4f472b5586ac5850f5f74')
     key  = bytearray.fromhex('34e86915d20c485090a6977931f96df5')
 
-    Keys = [i for i in range(18)]
+    Keys = list(range(18))
     ComputedKeys, Ar, ComputedKeysPrime, ArPrime, ComputedKc = H(key, rand, aco, 12)
     print('test_e3_2 BEGIN ComputedKeys, Ar')
     round1 =bytearray.fromhex('950e604e655ea3800fe3eb4a28918087')

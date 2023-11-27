@@ -6,6 +6,7 @@ constants.py
 
 """
 
+
 from binascii import unhexlify, hexlify
 from BitVector import *
 
@@ -102,8 +103,5 @@ G2 = [
 ]
 
 
-# NOTE: used for nonlin_subs
-EXP_45 = []
-for i in range(0, 256):
-    EXP_45.append(int( ((45**i) % 257 ) % 256))
+EXP_45 = [int( ((45**i) % 257 ) % 256) for i in range(0, 256)]
 

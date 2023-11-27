@@ -28,7 +28,7 @@ def test_clk_gen(BEGIN, END):
             log.info('attack_tests i: {:10}, BEGIN: {}, END: {}'.format(i, BEGIN, END))
         CLK_HEX = hex(i)[2:]
         if len(CLK_HEX) % 2 == 1:
-            CLK_HEX = '0' + CLK_HEX
+            CLK_HEX = f'0{CLK_HEX}'
         # log.info('attack_tests {:10} CLK_HEX: {}'.format(i, CLK_HEX))
         CLK = bytearray.fromhex(CLK_HEX)
         while len(CLK) < 4:
@@ -42,26 +42,26 @@ def test_clk_gen(BEGIN, END):
 
 def test_clk_targets(clk_uint):
     clk_26_1 = clk_targets(clk_uint)
-    log.info('test_clk_targets bin: {}, {} bits'.format(clk_26_1.bin, clk_26_1.len))
-    log.info('test_clk_targets be : {}'.format(clk_26_1.uintbe))
-    log.info('test_clk_targets le : {}'.format(clk_26_1.uintle))
+    log.info(f'test_clk_targets bin: {clk_26_1.bin}, {clk_26_1.len} bits')
+    log.info(f'test_clk_targets be : {clk_26_1.uintbe}')
+    log.info(f'test_clk_targets le : {clk_26_1.uintle}')
 
 
 def test_pattern_match():
     out = bytearray.fromhex('08000100')
-    log.info('test_pattern_match: {}'.format(repr(pattern_match(PATTERNS, out))))
+    log.info(f'test_pattern_match: {repr(pattern_match(PATTERNS, out))}')
     out = bytearray.fromhex('00010008')
-    log.info('test_pattern_match: {}'.format(repr(pattern_match(PATTERNS, out))))
+    log.info(f'test_pattern_match: {repr(pattern_match(PATTERNS, out))}')
     out = bytearray.fromhex('00010008')
-    log.info('test_pattern_match: {}'.format(repr(pattern_match(PATTERNS, out))))
+    log.info(f'test_pattern_match: {repr(pattern_match(PATTERNS, out))}')
     out = bytearray.fromhex('00490003')
-    log.info('test_pattern_match: {}'.format(repr(pattern_match(PATTERNS, out))))
+    log.info(f'test_pattern_match: {repr(pattern_match(PATTERNS, out))}')
     out = bytearray.fromhex('61616161')
-    log.info('test_pattern_match: {}'.format(repr(pattern_match(PATTERNS, out))))
+    log.info(f'test_pattern_match: {repr(pattern_match(PATTERNS, out))}')
     out = bytearray.fromhex('62626262')
-    log.info('test_pattern_match: {}'.format(repr(pattern_match(PATTERNS, out))))
+    log.info(f'test_pattern_match: {repr(pattern_match(PATTERNS, out))}')
     out = bytearray.fromhex('6363636364646464')
-    log.info('test_pattern_match: {}'.format(repr(pattern_match(PATTERNS, out))))
+    log.info(f'test_pattern_match: {repr(pattern_match(PATTERNS, out))}')
 
 
 def test_Kc_prime_count(L):
@@ -70,12 +70,12 @@ def test_Kc_prime_count(L):
     BEGIN = 255
     END   = BEGIN + 30
 
-    with open("bf3/L{}-{}-{}.txt".format(L, BEGIN, END), mode="w") as fp:
+    with open(f"bf3/L{L}-{BEGIN}-{END}.txt", mode="w") as fp:
 
         for i in count(BEGIN):
             Kc_HEX = hex(i)[2:]
             if len(Kc_HEX) % 2 == 1:
-                Kc_HEX = '0' + Kc_HEX
+                Kc_HEX = f'0{Kc_HEX}'
             Kc = bytearray.fromhex(Kc_HEX)
             # NOTE: bytearray grows from right to left
             while len(Kc) < KEYS_LEN:
@@ -83,16 +83,16 @@ def test_Kc_prime_count(L):
             assert(len(Kc) == KEYS_LEN)
             Kc_prime, red = Kc_to_Kc_prime(Kc, L, red=True)
 
-            fp.write('i  : {}\n'.format(i))
-            fp.write('Kc : {}\n'.format(bytearray_to_hexstring(Kc)))
-            fp.write("red: {}\n".format(bytearray_to_hexstring(red)))
-            fp.write("Kc': {}\n".format(bytearray_to_hexstring(Kc_prime)))
+            fp.write(f'i  : {i}\n')
+            fp.write(f'Kc : {bytearray_to_hexstring(Kc)}\n')
+            fp.write(f"red: {bytearray_to_hexstring(red)}\n")
+            fp.write(f"Kc': {bytearray_to_hexstring(Kc_prime)}\n")
             fp.write('\n')
 
-            log.info('i  : {}'.format(i))
-            log.info('Kc : {}'.format(bytearray_to_hexstring(Kc)))
-            log.info("red: {}".format(bytearray_to_hexstring(red)))
-            log.info("Kc': {}".format(bytearray_to_hexstring(Kc_prime)))
+            log.info(f'i  : {i}')
+            log.info(f'Kc : {bytearray_to_hexstring(Kc)}')
+            log.info(f"red: {bytearray_to_hexstring(red)}")
+            log.info(f"Kc': {bytearray_to_hexstring(Kc_prime)}")
             log.info('')
 
             if i >= END:
@@ -149,10 +149,7 @@ def L1_table():
     with open("table.txt", mode="w") as fp:
         # for i in range(256):
         for i in range(80):
-            # NOTE use {{ or }} to escape curly braces in a format string
-            row = ''
-            # row  = '{:3} & '.format(i)
-            row += '\\texttt{{{}}} & '.format(bytearray_to_hexstring(e0s[i]))
+            row = '' + '\\texttt{{{}}} & '.format(bytearray_to_hexstring(e0s[i]))
             row += '\\texttt{{{}}} '.format(bytearray_to_hexstring(aess[i]))
             row += '\\\\'
             row += '\n'

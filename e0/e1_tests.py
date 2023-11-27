@@ -15,7 +15,7 @@ def test_e1_1():
     addr  = bytearray.fromhex('000000000000')
     key   = bytearray.fromhex('00000000000000000000000000000000')
 
-    Keys = [i for i in range(18)]
+    Keys = list(range(18))
     ComputedKeys, Ar, ComputedKeysPrime, ArPrime, ComputedKc = H(key, rand, addr, 6)
     print('test_e1_1 BEGIN ComputedKeys, Ar')
     round1 =bytearray.fromhex('00000000000000000000000000000000')
@@ -74,9 +74,9 @@ def test_e1_1():
 
     print('test_e1_1 BEGIN ComputedKeysPrime, ArPrime')
     round1 =bytearray.fromhex('158ffe43352085e8a5ec7a88e1ff2ba8')
-    log.debug('test_e1_1 Ar[9]     : {}'.format(repr(Ar[9])))
-    log.debug('test_e1_1 ArPrime[1]: {}'.format(repr(ArPrime[1])))
-    log.debug('test_e1_1 round1    : {}'.format(repr(round1)))
+    log.debug(f'test_e1_1 Ar[9]     : {repr(Ar[9])}')
+    log.debug(f'test_e1_1 ArPrime[1]: {repr(ArPrime[1])}')
+    log.debug(f'test_e1_1 round1    : {repr(round1)}')
     assert ArPrime[1] == round1
     Keys[1]=bytearray.fromhex('e9e5dfc1b3a79583e9e5dfc1b3a79583')
     assert ComputedKeysPrime[1] == Keys[1]
@@ -132,8 +132,8 @@ def test_e1_1():
     SRES      =bytearray.fromhex('056c0fe6')
     ACO       =bytearray.fromhex('48afcdd4bd40fef76693b113')
     Out       =bytearray.fromhex('056c0fe648afcdd4bd40fef76693b113')
-    log.debug('test_e1_1 Out        : {}'.format(repr(Out)))
-    log.debug('test_e1_1 ArPrime[9] : {}'.format(repr(ArPrime[9])))
+    log.debug(f'test_e1_1 Out        : {repr(Out)}')
+    log.debug(f'test_e1_1 ArPrime[9] : {repr(ArPrime[9])}')
     assert ArPrime[10] == Out
     assert ArPrime[10][:4] == SRES
     assert ArPrime[10][4:] == ACO

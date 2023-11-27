@@ -23,11 +23,7 @@ def Kc_to_Kc_prime(Kc, L, red=False):
 
     if L == 16:
         log.debug('Kc_to_Kc_prime If L=16 then Kc_prime equals Kc')
-        if red:
-            return Kc, Kc
-        else:
-            return Kc
-
+        return (Kc, Kc) if red else Kc
     else:
         g1 = BitVector(intVal=G1[L], size=128)
         g2 = BitVector(intVal=G2[L], size=128)
@@ -43,15 +39,13 @@ def Kc_to_Kc_prime(Kc, L, red=False):
             assert Kc_mod_g1_ba[i] == 0
 
         Kc_prime_bv = g2.gf_multiply(Kc_mod_g1)[128:]
-        log.debug('Kc_to_Kc_prime: bits: {}, {}'.format(len(Kc_prime_bv),
-            Kc_prime_bv.count_bits()))
+        log.debug(
+            f'Kc_to_Kc_prime: bits: {len(Kc_prime_bv)}, {Kc_prime_bv.count_bits()}'
+        )
         Kc_prime = BitVector_to_bytearray(Kc_prime_bv)
         assert len(Kc_prime) == Ar_KEY_LEN and type(Kc_prime) == bytearray
 
-        if red:
-            return Kc_prime, Kc_mod_g1_ba
-        else:
-            return Kc_prime
+        return (Kc_prime, Kc_mod_g1_ba) if red else Kc_prime
 
 
 def bytearray_to_hexstring(ba):
@@ -61,7 +55,7 @@ def bytearray_to_hexstring(ba):
     for b in ba:
         hex_digit = hex(b)[2:]   # 0x0 ... 0xff
         if len(hex_digit) == 1:
-            hex_digit = '0' + hex_digit
+            hex_digit = f'0{hex_digit}'
         # log.debug('bytearray_to_hexstring: {}, {}'.format(b, hex_digit))
         ba_hex_str += hex_digit   # 0x0 ... 0xff
     # log.debug('bytearray_to_hexstring: {}'.format(ba_hex_str))
@@ -72,23 +66,18 @@ def hexstring_to_BitVector(hexstring):
     """Ugly workaround to create BitVector."""
     assert type(hexstring) == str
 
-    bv = BitVector(hexstring=hexstring)
-
-    return bv
+    return BitVector(hexstring=hexstring)
 
 
 def BitVector_to_bytearray(bv):
     assert type(bv) == BitVector
 
     bv_hexstring = bv.get_bitvector_in_hex()
-    log.debug('BitVector_to_bytearray bv_hexstring: {}'.format(bv_hexstring))
+    log.debug(f'BitVector_to_bytearray bv_hexstring: {bv_hexstring}')
     ba = bytearray.fromhex(bv.getHexStringFromBitVector())
 
     assert len(ba) == Ar_KEY_LEN
     return ba
 
 
-if __name__ == '__main__':
-
-    pass
 

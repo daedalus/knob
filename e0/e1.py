@@ -26,7 +26,7 @@ def e1(K, RAND, BTADD_S):
 
     Keys, Ar, KeysPrime, ArPrime, Out = H(K, RAND, BTADD_S, 6)
 
-    SRES = Out[0:4]
+    SRES = Out[:4]
     assert len(SRES) == SRES_LEN
 
     ACO = Out[4:]

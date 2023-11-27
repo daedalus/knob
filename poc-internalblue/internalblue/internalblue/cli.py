@@ -61,15 +61,15 @@ def commandLoop(internalblue):
             cmdword = cmdline.split(' ')[0].split('=')[0]
             if(cmdword == ''):
                 continue
-            log.debug("Command Line: [[" + cmdword + "]] " + cmdline)
+            log.debug(f"Command Line: [[{cmdword}]] {cmdline}")
             matching_cmd = cmds.findCmd(cmdword)
-            if matching_cmd == None:
-                log.warn("Command unknown: " + cmdline)
+            if matching_cmd is None:
+                log.warn(f"Command unknown: {cmdline}")
                 continue
             cmd_instance = matching_cmd(cmdline, internalblue)
 
-            if(not cmd_instance.work()):
-                log.warn("Command failed: " + str(cmd_instance))
+            if (not cmd_instance.work()):
+                log.warn(f"Command failed: {str(cmd_instance)}")
         except ValueError as e:
             log.warn(str(e))
             continue
@@ -82,7 +82,7 @@ def commandLoop(internalblue):
                 break
         except Exception as e:
             internalblue.exit_requested = True      # Make sure all threads terminate
-            log.critical("Uncaught exception (%s). Abort." % str(e))
+            log.critical(f"Uncaught exception ({str(e)}). Abort.")
             print(traceback.format_exc())
             break
         cmd_instance = None
@@ -101,8 +101,7 @@ def internalblue_cli():
     # Readline Completions
     cmd_keywords = []
     for cmd in cmds.getCmdList():
-        for keyword in cmd.keywords:
-            cmd_keywords.append(keyword)
+        cmd_keywords.extend(iter(cmd.keywords))
     readline_completer = term.completer.LongestPrefixCompleter(words=cmd_keywords)
     term.readline.set_completer(readline_completer)
 
@@ -117,11 +116,8 @@ def internalblue_cli():
     # shutdown connection
     internalblue.shutdown()
 
-    # Save readline history:
-    f = open(HISTFILE, "w")
-    f.write("\n".join(term.readline.history))
-    f.close()
-
+    with open(HISTFILE, "w") as f:
+        f.write("\n".join(term.readline.history))
     # Cleanup
     log.info("Goodbye")
 

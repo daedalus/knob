@@ -37,24 +37,24 @@ def H(K, I_one, I_two, L):
     """
     assert len(K) == Ar_KEY_LEN    and type(K) == bytearray
     assert len(I_one) == Ar_KEY_LEN and type(I_one) == bytearray
-    assert (len(I_two) == COF_LEN or len(I_two) == BTADD_LEN)  and type(I_two) == bytearray
+    assert len(I_two) in [COF_LEN, BTADD_LEN] and type(I_two) == bytearray
 
-    log.debug('H(K, I_one, I_two, {})'.format(L))
+    log.debug(f'H(K, I_one, I_two, {L})')
 
     Keys = key_sched(K)
     K_tilda = K_to_K_tilda(K)
     KeysPrime = key_sched(K_tilda)
 
     I_two_ext = E(I_two, L)
-    log.debug('H I_two    : {}'.format(repr(I_two)))
-    log.debug('H I_two_ext: {}'.format(repr(I_two_ext)))
+    log.debug(f'H I_two    : {repr(I_two)}')
+    log.debug(f'H I_two_ext: {repr(I_two_ext)}')
 
     Ar = Ar_rounds(Keys, I_one, is_prime=False)
 
     pre_ar_prime_inp = xor_bytes(Ar[10], I_one)
-    log.debug('H pre_ar_prime_inp: {}'.format(repr(pre_ar_prime_inp)))
+    log.debug(f'H pre_ar_prime_inp: {repr(pre_ar_prime_inp)}')
     ar_prime_inp = add_bytes_mod256(I_two_ext, pre_ar_prime_inp)
-    log.debug('H ar_prime_inp: {}'.format(repr(ar_prime_inp)))
+    log.debug(f'H ar_prime_inp: {repr(ar_prime_inp)}')
     ArPrime = Ar_rounds(KeysPrime, ar_prime_inp, is_prime=True)
 
     # NOTE: either Kc or SRES || ACO
@@ -73,12 +73,12 @@ def Ar_rounds(Keys, inp, is_prime):
     assert len(inp) == Ar_KEY_LEN and type(inp) == bytearray
 
     # NOTE: Ar[0..9]
-    Ar = [i for i in range(11)]
+    Ar = list(range(11))
     Ar[0] = None
 
     # NOTE: deep copy here
     Ar[1] = bytearray(inp[i] for i in range(16))
-    log.debug('Ar_rounds is_prime: {}, Ar[1]: {}'.format(is_prime, repr(Ar[1])))
+    log.debug(f'Ar_rounds is_prime: {is_prime}, Ar[1]: {repr(Ar[1])}')
 
     # NOTE: temp holds the current input value
     temp  = bytearray(inp[i] for i in range(16))
@@ -110,7 +110,7 @@ def Ar_rounds(Keys, inp, is_prime):
 
     Ar[10] = add_one(Ar[9], Keys[17])
     # log.debug('Ar_rounds is_prime: {}, Ar[10]: {}'.format(is_prime, repr(Ar[9])))
-    emsg = 'Ar_rounds len(Ar) is {}, it should be {}'.format(len(Ar), 10)
+    emsg = f'Ar_rounds len(Ar) is {len(Ar)}, it should be 10'
     assert(len(Ar) == 11), emsg
 
     return Ar
@@ -218,10 +218,10 @@ def PERMUTE(inp):
 
 
 def key_sched(key):
-    emsg = 'key_sched key len is {}, it should be {}'.format(len(key), Ar_KEY_LEN)
+    emsg = f'key_sched key len is {len(key)}, it should be {Ar_KEY_LEN}'
     assert len(key) == Ar_KEY_LEN, emsg
 
-    Keys = [i for i in range(18)]
+    Keys = list(range(18))
     Keys[0] = None  # Keys[0] is not used
 
     B = biases()
@@ -235,10 +235,10 @@ def key_sched(key):
     presel_k1 = bytearray(key[i] for i in range(16))
     presel_k1.append(byte_16)
     # log.debug('key_sched presel_k1: {}'.format(repr(presel_k1)))
-    emsg = 'key_sched presel_k1 len is {}, it should be {}'.format(len(presel_k1),Ar_KEY_LEN+1)
+    emsg = f'key_sched presel_k1 len is {len(presel_k1)}, it should be {Ar_KEY_LEN + 1}'
     assert len(presel_k1) == Ar_KEY_LEN+1, emsg
     k1 = select(1, presel_k1)
-    emsg = 'key_sched k1 len is {}, it should be {}'.format(len(k1),Ar_KEY_LEN)
+    emsg = f'key_sched k1 len is {len(k1)}, it should be {Ar_KEY_LEN}'
     assert len(k1) == Ar_KEY_LEN, emsg
     Keys[1] = k1
     # log.debug('key_sched k1: {}'.format(repr(k1)))
@@ -260,8 +260,8 @@ def key_sched(key):
 
 def select(what, key):
 
-    if   what == 1:
-        selected_key = key[0:16]
+    if what == 1:
+        selected_key = key[:16]
     elif what == 2:
         selected_key = key[1:]
     elif what == 3:
@@ -310,10 +310,9 @@ def select(what, key):
         selected_key = key[16:]
         selected_key.extend(key[:15])
     else:
-        log.error('select what: {} is not supported'.format(what))
+        log.error(f'select what: {what} is not supported')
         return None
-    emsg = 'select selected_key len is {}, it should be {}'.format(
-            len(selected_key),Ar_KEY_LEN)
+    emsg = f'select selected_key len is {len(selected_key)}, it should be {Ar_KEY_LEN}'
 
     assert len(selected_key) == Ar_KEY_LEN, emsg
     return selected_key
@@ -343,7 +342,7 @@ def biases():
 
     """
 
-    B = [i for i in range(18)]
+    B = list(range(18))
     B[0] = None   # not used
     B[1] = None   # not used
 
@@ -434,9 +433,9 @@ def xor_bytes(l, r):
 
 def K_to_K_tilda(K):
     """(EQ 15) p 1676 Accepts and returns a bytearray"""
-    emsg1 = 'K_to_K_tilda K len is {}, it should be {}'.format(len(K), Ar_KEY_LEN)
+    emsg1 = f'K_to_K_tilda K len is {len(K)}, it should be {Ar_KEY_LEN}'
     assert len(K) == Ar_KEY_LEN, emsg1
-    emsg2 = 'K_to_K_tilda K type is {}, it should be a bytearray'.format(type(K))
+    emsg2 = f'K_to_K_tilda K type is {type(K)}, it should be a bytearray'
     assert type(K) == bytearray, emsg2
 
     K_tilda = bytearray()
@@ -456,7 +455,7 @@ def K_to_K_tilda(K):
     K_tilda.append((K[13] + 167) % 256)
     K_tilda.append( K[14] ^ 149)
     K_tilda.append((K[15] + 131) % 256)
-    log.debug('K_to_K_tilda K_tilda: {}'.format(repr(K_tilda)))
+    log.debug(f'K_to_K_tilda K_tilda: {repr(K_tilda)}')
 
     assert len(K_tilda) == Ar_KEY_LEN
     return K_tilda
@@ -464,14 +463,12 @@ def K_to_K_tilda(K):
 
 def K_to_K_tilda_str(K):
     """(EQ 15) p 1676 Accepts and returns a str"""
-    emsg1 = 'K_to_K_tilda K len is {}. it should be {}'.format(len(K),
-            Ar_KEY_LEN)
+    emsg1 = f'K_to_K_tilda K len is {len(K)}. it should be {Ar_KEY_LEN}'
     assert len(K) == Ar_KEY_LEN, emsg1
-    emsg2 = 'K_to_K_tilda K type is {}. it should be {}'.format(type(K), str)
+    emsg2 = f'K_to_K_tilda K type is {type(K)}. it should be {str}'
     assert type(K) == str, emsg2
 
-    K_tilda = ''
-    K_tilda += chr( (ord(K[0]) + 233) % 256 )
+    K_tilda = f'{chr((ord(K[0]) + 233) % 256)}'
     K_tilda += chr( (ord(K[1]) ^ 229 ) )
     K_tilda += chr( (ord(K[2]) + 223) % 256 )
     K_tilda += chr( (ord(K[3]) ^ 193 ) )
@@ -487,7 +484,7 @@ def K_to_K_tilda_str(K):
     K_tilda += chr( (ord(K[13]) + 167) % 256 )
     K_tilda += chr( (ord(K[14]) ^ 149 ) )
     K_tilda += chr( (ord(K[15]) + 131) % 256 )
-    log.debug('K_to_K_tilda_str: {}'.format(K_tilda.encode('hex')))
+    log.debug(f"K_to_K_tilda_str: {K_tilda.encode('hex')}")
 
     return K_tilda
 
@@ -498,11 +495,11 @@ def E(inp, L):
     X[i % L] for i = 0...15
 
     """
-    emsg1 = 'E L is {}, it should be {}'.format(type(L), 'int')
+    emsg1 = f'E L is {type(L)}, it should be int'
     assert type(L) == int, emsg1
-    emsg2 = 'E inp is {}, it should be bytearray'.format(type(inp))
+    emsg2 = f'E inp is {type(inp)}, it should be bytearray'
     assert type(inp) == bytearray, emsg2
-    emsg3 = 'E inp len is {}, it should be {}'.format(len(inp), L)
+    emsg3 = f'E inp len is {len(inp)}, it should be {L}'
     assert len(inp) == L, emsg3
 
     ext_inp = bytearray()
@@ -522,11 +519,11 @@ def E_str(inp, L):
     Our inp should always be 12 Bytes long.
     """
 
-    emsg1 = 'E L is {}, it should be {}'.format(type(L), 'int')
+    emsg1 = f'E L is {type(L)}, it should be int'
     assert type(L) == int, emsg1
-    emsg2 = 'E inp is {}, it should be {}'.format(type(inp), 'str')
+    emsg2 = f'E inp is {type(inp)}, it should be str'
     assert type(inp) == str, emsg2
-    emsg3 = 'E inp len is {}, it should be {}'.format(len(inp), L)
+    emsg3 = f'E inp len is {len(inp)}, it should be {L}'
     assert len(inp) == L, emsg3
 
     ext_inp = ''
@@ -535,8 +532,8 @@ def E_str(inp, L):
         ext_inp += inp[index]
     # log.debug('E     inp: {}'.format(inp))
     # log.debug('E ext_inp: {}'.format(ext_inp))
-    log.debug('E     inp: {}'.format(inp.encode('hex')))
-    log.debug('E ext_inp: {}'.format(ext_inp.encode('hex')))
+    log.debug(f"E     inp: {inp.encode('hex')}")
+    log.debug(f"E ext_inp: {ext_inp.encode('hex')}")
 
     return ext_inp
 

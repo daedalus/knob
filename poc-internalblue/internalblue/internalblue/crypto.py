@@ -47,10 +47,7 @@ def lmp_Kc(link_key):
     """
     Derive Kc from link key
     """
-    Kc = b''
-
-
-    return Kc
+    return b''
 
 
 def lmp_e0(Kc, clock, BD_ADDR, EN_RAND):
@@ -107,11 +104,7 @@ def lmp_shorten_ek(Kc, g1, g2):
     g2(x) is a poly of degree \le 128 - 8L
 
     """
-    Kc_prime = b''
-
-    # TODO
-
-    return Kc_prime
+    return b''
 
 
 def lmp_cof(is_master_key, master_btaddr=b''):
@@ -124,29 +117,23 @@ def lmp_cof(is_master_key, master_btaddr=b''):
         returns Authenticated Ciphering Offset (ACO)
     """
     cof = b''
-    if is_master_key:
-        cof = master_btaddr + master_btaddr
-    else:
-        cof = aco
-
-    return cof
+    return master_btaddr + master_btaddr if is_master_key else aco
 
 
 if __name__ == "__main__":
 
 
     LINK_KEY = b''
-    assert len(LINK_KEY) == 16, "len(LINK_KEY) is {}, it should be 16 B".format(len(LINK_KEY))
+    assert (
+        len(LINK_KEY) == 16
+    ), f"len(LINK_KEY) is {len(LINK_KEY)}, it should be 16 B"
     EN_RAND = b''
-    assert len(EN_RAND) == 16, "len(EN_RAND) is {}, it should be 16 B".format(len(EN_RAND))
+    assert len(EN_RAND) == 16, f"len(EN_RAND) is {len(EN_RAND)}, it should be 16 B"
     COF = b''
-    assert len(COF) == 12, "len(COF) is {}, it should be 12 B".format(len(COF))
+    assert len(COF) == 12, f"len(COF) is {len(COF)}, it should be 12 B"
 
     EK_LEN = 1  # Bytes
 
     SECURE_CONNECTIONS = False
-    if SECURE_CONNECTIONS:
-        ALGO = ek_aes
-    else:
-        ALGO = ek_e0
+    ALGO = ek_aes if SECURE_CONNECTIONS else ek_e0
 

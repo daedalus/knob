@@ -311,7 +311,7 @@ class HCI_Cmd(HCI):
 
     @staticmethod
     def from_data(data):
-        return HCI_Cmd(u16(data[0:2]), ord(data[2]), data[3:])
+        return HCI_Cmd(u16(data[:2]), ord(data[2]), data[3:])
 
     def __init__(self, opcode, length, data):
         HCI.__init__(self, HCI.HCI_CMD)
@@ -327,13 +327,18 @@ class HCI_Cmd(HCI):
         cmdname = "unknown"
         if self.opcode in self.HCI_CMD_STR:
             cmdname = self.HCI_CMD_STR[self.opcode]
-        return parent + "<0x%04x %s (len=%d): %s>" % (self.opcode, cmdname, self.length, self.data[0:16].encode('hex'))
+        return parent + "<0x%04x %s (len=%d): %s>" % (
+            self.opcode,
+            cmdname,
+            self.length,
+            self.data[:16].encode('hex'),
+        )
 
 class HCI_Acl(HCI):
 
     @staticmethod
     def from_data(data):
-        handle = u16(unbits(bits_str(data[0:2])[0:12].rjust(16,'0')))
+        handle = u16(unbits(bits_str(data[:2])[:12].rjust(16, '0')))
         bp = u8(unbits(bits_str(data[1:2])[4:6].rjust(8,'0')))
         bc = u8(unbits(bits_str(data[1:2])[6:8].rjust(8,'0')))
         return HCI_Acl(handle, bp, bc, u16(data[2:4]), data[4:])
@@ -356,7 +361,7 @@ class HCI_Sco(HCI):
 
     @staticmethod
     def from_data(data):
-        handle = u16(unbits(bits_str(data[0:2])[0:12].rjust(16,'0')))
+        handle = u16(unbits(bits_str(data[:2])[:12].rjust(16, '0')))
         ps = u8(unbits(bits_str(data[1:2])[4:6].rjust(8,'0')))
         return HCI_Sco(handle, ps, u16(data[2]), data[3:])
 
@@ -471,7 +476,12 @@ class HCI_Event(HCI):
         eventname = "unknown"
         if self.event_code in self.HCI_EVENT_STR:
             eventname = self.HCI_EVENT_STR[self.event_code]
-        return parent + "<0x%02x %s (len=%d): %s>" % (self.event_code, eventname, self.length, self.data[0:].encode('hex'))
+        return parent + "<0x%02x %s (len=%d): %s>" % (
+            self.event_code,
+            eventname,
+            self.length,
+            self.data[:].encode('hex'),
+        )
 
 HCI_UART_TYPE_CLASS = {
         HCI.HCI_CMD :  HCI_Cmd,
@@ -497,7 +507,7 @@ class StackDumpReceiver:
             return
         if hcipkt.data[0] == '\x57':
             self.handleNexus6pStackDump(hcipkt)
-        if hcipkt.data[0:4] == p32(0x039200f7):
+        if hcipkt.data[:4] == p32(0x039200F7):
             self.handleNexus5StackDump(hcipkt)
 
 
@@ -505,24 +515,22 @@ class StackDumpReceiver:
         """ Data should be a byte string containing all payload bytes
         beginning with the checksum byte.
         """
-        return sum([ord(x) for x in data]) % 0x100 == 0
+        return sum(ord(x) for x in data) % 0x100 == 0
 
     def handleRamDump(self, data):
         """ Data should be a byte string containing the address (4 byte)
         followed by the actual ram dump (at this address)
         """
         addr = u32(data[:4])
-        if self.memdump_addr == None:
+        if self.memdump_addr is None:
             self.memdump_addr = addr
         self.memdumps[addr-self.memdump_addr] = data[4:]
 
     def finishStackDump(self):
         dump = fit(self.memdumps)
         log.warn("Stack dump @0x%08x written to internalblue_stackdump.bin!" % self.memdump_addr)
-        f = open("internalblue_stackdump.bin", "wb")
-        f.write(dump)
-        f.close()
-
+        with open("internalblue_stackdump.bin", "wb") as f:
+            f.write(dump)
         # Shut down:
         self.stack_dump_has_happend = True
 
